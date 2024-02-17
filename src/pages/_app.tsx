@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import WagmiProvider from "../utils/wagmiprovider";
+import { AuthContextProvider } from "../context/auth-context";
 import Head from "next/head";
 // import Navbar from "@/components/Navbar";
 import dynamic from "next/dynamic";
@@ -32,7 +33,7 @@ const theme = extendTheme({ colors, config });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <WagmiProvider>
+    <AuthContextProvider>
       <ChakraProvider theme={theme}>
         <div
           style={{
@@ -45,6 +46,6 @@ export default function App({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </div>
       </ChakraProvider>
-    </WagmiProvider>
+    </AuthContextProvider>
   );
 }
