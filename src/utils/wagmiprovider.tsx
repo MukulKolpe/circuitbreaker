@@ -2,6 +2,7 @@
 import {
   connectorsForWallets,
   RainbowKitProvider,
+  RainbowKitAuthenticationProvider,
   darkTheme,
 } from "@rainbow-me/rainbowkit";
 
