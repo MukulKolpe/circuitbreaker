@@ -1,6 +1,16 @@
 // @ts-nocheck comment
 import React, { useState, useEffect } from "react";
+import * as bandadaAPI from "../../pages/api/bandadaAPI";
 import {
+  useDisclosure,
+  Lorem,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
   Box,
   Heading,
   Text,
@@ -91,27 +101,45 @@ const DaosCard = ({
 }) => {
   const toast = useToast();
   const router = useRouter();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [txHash, setTxHash] = useState("");
+  const [added, setAdded] = useState(false);
 
   const joinDao = async () => {
+    onOpen();
+    const memberid = localStorage.getItem("commitment-id");
+    const res = await bandadaAPI.addMember(
+      process.env.NEXT_PUBLIC_GROUP_ID,
+      memberid
+    );
+    setAdded(true);
     if (window.ethereum._state.accounts.length !== 0) {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(
-        process.env.NEXT_PUBLIC_USERSIDE_ADDRESS,
-        usersideabi,
-        signer
-      );
-      const accounts = await provider.listAccounts();
-      const tx = await contract.joinDao(daoId, accounts[0]);
-      await tx.wait();
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const contract = new ethers.Contract(
+          process.env.NEXT_PUBLIC_USERSIDE_ADDRESS,
+          usersideabi,
+          signer
+        );
 
-      toast({
-        title: "Congratulations!",
-        description: "You have successfully joined the DAO",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+        const accounts = await provider.listAccounts();
+        const tx = await contract.joinDao(daoId, accounts[0]);
+
+        console.log(tx);
+        await tx.wait();
+        setTxHash(tx.hash);
+
+        toast({
+          title: "Congratulations!",
+          description: "You have successfully joined the DAO",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } catch (error) {
+        console.log(error);
+      }
     } else {
       const particleProvider = new ParticleProvider(particle.auth);
       const accounts = await particleProvider.request({
@@ -332,6 +360,44 @@ const DaosCard = ({
           </Button>
         </Box>
       </Box>
+      <Modal blockScrollOnMount={false} isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Join DAO</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {added ? (
+              <Text>
+                {" "}
+                ✔️ Added to Bandada group <br />
+                🚀 Group id : <span>{process.env.NEXT_PUBLIC_GROUP_ID} </span>
+              </Text>
+            ) : (
+              <Text>Adding to Bandada grp</Text>
+            )}
+
+            {txHash === "" ? (
+              <Text> Adding to DAO </Text>
+            ) : (
+              <Text>
+                ✔️Added to DAO{" "}
+                <Link
+                  href={`https://goerli.etherscan.io/tx/${txHash}`}
+                  isExternal
+                >
+                  View Transaction
+                </Link>
+              </Text>
+            )}
+          </ModalBody>
+
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Center>
   );
 };

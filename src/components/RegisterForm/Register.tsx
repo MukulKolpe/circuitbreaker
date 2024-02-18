@@ -30,7 +30,7 @@ import {
   Stack,
   ring,
 } from "@chakra-ui/react";
-
+import { Identity } from "@semaphore-protocol/identity";
 import { useToast } from "@chakra-ui/react";
 import { ParticleProvider } from "@particle-network/provider";
 import { ethers } from "ethers";
@@ -88,6 +88,9 @@ const RegisterForm = () => {
   };
 
   const handleSubmit = async (e) => {
+    const identity = new Identity();
+    localStorage.setItem("semaphore-id", identity.toString());
+    localStorage.setItem("commitment-id", identity._commitment);
     if (window.ethereum._state.accounts.length !== 0) {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();

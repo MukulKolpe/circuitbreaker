@@ -51,7 +51,7 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
             address,
             statement:
               "You are using your Ethereum Wallet to sign in to Bandada.",
-            uri: window.location.origin,
+            uri: "https://bandada.pse.dev/",
             version: "1",
             chainId,
             nonce,
@@ -60,6 +60,8 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
         getMessageBody: ({ message }) => message.prepareMessage(),
 
         verify: async ({ message, signature }) => {
+          console.log(signature);
+
           const admin = await signIn({
             message,
             signature,
