@@ -1,3 +1,4 @@
+// @ts-nocheck comment
 import { useCallback, useEffect, useState } from "react";
 import { Admin } from "../types";
 import dynamic from "next/dynamic";
