@@ -1,3 +1,4 @@
+// @ts-nocheck comment
 "use client";
 
 // iron-session handles sessions with encoded cookies.

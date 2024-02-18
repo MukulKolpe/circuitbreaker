@@ -33,7 +33,7 @@ const theme = extendTheme({ colors, config });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <AuthContextProvider>
+    <WagmiProvider>
       <ChakraProvider theme={theme}>
         <div
           style={{
@@ -46,6 +46,6 @@ export default function App({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </div>
       </ChakraProvider>
-    </AuthContextProvider>
+    </WagmiProvider>
   );
 }
