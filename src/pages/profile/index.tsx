@@ -198,7 +198,7 @@ const Profile = () => {
                 <Text mt={2}>{dao.daoInfo.daoDescription}</Text>
                 <Link
                   color="teal.500"
-                  href={`https://op-hacks.vercel.app/dao/${dao.daoInfo[0].toString()}`}
+                  href={`https://circuitbreaker-two.vercel.app/dao/${dao.daoInfo[0].toString()}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   position="absolute"
