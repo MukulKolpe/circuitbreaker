@@ -1,8 +1,9 @@
+// @ts-nocheck comment
 import { request } from "@bandada/utils";
 import { SiweMessage } from "siwe";
 import { Group } from "../types";
 
-const API_URL = "https://api-staging.bandada.pse.dev";
+const API_URL = "https://api.bandada.pse.dev";
 
 export async function getGroups(adminId: string): Promise<Group[] | null> {
   try {
@@ -235,6 +236,12 @@ export async function addMemberByCredentials(
  * @param group The group id.
  * @param memberId The group member id.
  */
+
+/**
+ * It adds new members to an existing group.
+ * @param group The group id.
+ * @param memberIds The array of group member ids.
+ */
 export async function addMember(
   groupId: string,
   memberId: string
@@ -242,38 +249,9 @@ export async function addMember(
   try {
     await request(`${API_URL}/groups/${groupId}/members/${memberId}`, {
       method: "POST",
-    });
-  } catch (error: any) {
-    console.error(error);
-
-    if (error.response) {
-      alert(error.response.statusText);
-    } else {
-      alert("Some error occurred!");
-    }
-
-    return null;
-  }
-}
-
-/**
- * It adds new members to an existing group.
- * @param group The group id.
- * @param memberIds The array of group member ids.
- */
-export async function addMembers(
-  groupId: string,
-  memberIds: string[]
-): Promise<void | null> {
-  try {
-    await request(`${API_URL}/groups/${groupId}/members`, {
-      method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "x-api-key": "52d4df3f-04fa-44d0-a7e6-5af3c73869db",
       },
-      data: JSON.stringify({
-        memberIds,
-      }),
     });
   } catch (error: any) {
     console.error(error);
@@ -383,15 +361,12 @@ export async function signIn({
   message: SiweMessage;
   signature: string;
 }): Promise<any | null> {
-  console.log(message.toMessage());
-  console.log(signature);
-
   try {
     return await request(`${API_URL}/auth`, {
       method: "POST",
       data: {
-        message: message.toMessage().slice(0, 6),
-        signature,
+        message: "You are using your Ethereum Wallet to sign in to Bandada",
+        signature: signature,
       },
     });
   } catch (error: any) {
