@@ -1055,6 +1055,16 @@ const index = () => {
                     View all files
                   </Button>
                 </Box>
+                <Box>
+                  <Button
+                    onClick={() =>
+                      router.push(`/chat/${process.env.NEXT_PUBLIC_GROUP_ID}`)
+                    }
+                    mt={10}
+                  >
+                    DAO Forum
+                  </Button>
+                </Box>
               </Flex>
             </>
           )}
