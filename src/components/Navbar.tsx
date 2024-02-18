@@ -59,7 +59,7 @@ export default function Navbar() {
             color="brand.00"
           >
             <Link href="/" mt={1}>
-              <Text>CircuitBreaker</Text>
+              <Text>DAOConnect</Text>
             </Link>
           </HStack>
           <Flex alignItems={"center"}>
