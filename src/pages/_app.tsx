@@ -33,19 +33,25 @@ const theme = extendTheme({ colors, config });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <WagmiProvider>
-      <ChakraProvider theme={theme}>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            minHeight: "100vh",
-          }}
-        >
-          <Navbar />
-          <Component {...pageProps} />
-        </div>
-      </ChakraProvider>
-    </WagmiProvider>
+    <>
+      <Head>
+        <title>DAOConnect</title>
+        <meta name="description" content="Unlocking DAO Potential" />
+      </Head>
+      <WagmiProvider>
+        <ChakraProvider theme={theme}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              minHeight: "100vh",
+            }}
+          >
+            <Navbar />
+            <Component {...pageProps} />
+          </div>
+        </ChakraProvider>
+      </WagmiProvider>
+    </>
   );
 }
