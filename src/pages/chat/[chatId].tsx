@@ -1,4 +1,23 @@
 // @ts-nocheck comment
+import {
+  Box,
+  Flex,
+  HStack,
+  IconButton,
+  Button,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+  useDisclosure,
+  useColorModeValue,
+  Stack,
+  Icon,
+  Heading,
+  Text,
+  Input,
+} from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Identity } from "@semaphore-protocol/identity";
@@ -18,6 +37,7 @@ const index = () => {
   const [grpMembers, setGrpMembers] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
   const [isMember, setIsMember] = useState("loading");
+  const [chatData, setChatData] = useState([]);
   const localStorageCommitment = "bandada-identity-commitment";
   const localStoragePrivateKey = "bandada-identity-privatekey";
   const localStorageSecret = "bandada-identity-Secret";
@@ -38,11 +58,10 @@ const index = () => {
 
   const generateMerkleProof = async () => {
     //const chatId = router.query.chatId;
-    const tempIdentityString = localStorage.getItem(localCustomCommitment);
-    const tempidentity = new Identity(tempIdentityString);
+    const tempIdentityString = localStorage.getItem("commitment-id");
 
     const res = await fetch(
-      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${tempidentity._commitment}/proof`
+      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${tempIdentityString}/proof`
     );
     if (res.status == 200) {
       const data = await res.json();
@@ -86,13 +105,14 @@ const index = () => {
   };
 
   const checkMember = async () => {
-    const tempIdentityString = localStorage.getItem(localCustomCommitment);
-    const tempidentity = new Identity(tempIdentityString);
+    const tempIdentityString = localStorage.getItem("commitment-id");
 
     const res = await fetch(
-      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${tempidentity._commitment}`
+      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${tempIdentityString}`
     );
     const data = await res.json();
+    console.log(groupChatId);
+    console.log(tempIdentityString);
     console.log(data);
     if (data) {
       setIsMember("Granted");
@@ -136,12 +156,13 @@ const index = () => {
       }),
     });
     const data = await res.json();
+    setChatData(data);
     console.log(data);
   };
 
   const sendChat = async () => {
-    const tempIdentityString = localStorage.getItem(localCustomCommitment);
-    const tempidentity = new Identity(tempIdentityString);
+    const tempIdentityString = localStorage.getItem("commitment-id");
+    generateMerkleProof();
     const res = await fetch(`/api/send-messages`, {
       method: "POST",
       headers: {
@@ -150,11 +171,12 @@ const index = () => {
       body: JSON.stringify({
         groupId: router.query.chatId,
         messageBody: inputMessage,
-        userId: tempidentity._commitment.toString(),
+        userId: tempIdentityString,
       }),
     });
     const data = await res.json();
     console.log(data);
+    getChats();
   };
 
   useEffect(() => {
@@ -175,17 +197,54 @@ const index = () => {
       {isMember == "Denied" ? (
         <Center>You are not a member of the Group</Center>
       ) : (
-        <>
-          {router.query.chatId}
-          <button onClick={generateMessageProof}>Click Me</button>
-          <input
-            type="text"
-            onChange={(e) => setInputMessage(e.target.value)}
-            value={inputMessage}
-          />
-          <button onClick={sendChat}>Send Message</button>
-          <button onClick={getCustomCommitment}>Set Commitment</button>
-        </>
+        <div position="relative" h="100vh">
+          <Flex
+            flexDir={"column"}
+            alignItems={"center"}
+            justifyContent={"center"}
+            scrollBehavior={"smooth"}
+            overflowY={"scroll"}
+            height={"70vh"}
+            mt={"50px"}
+          >
+            {chatData.map((chat, index) => (
+              <Box
+                key={index}
+                backgroundColor={"teal"}
+                padding={"20px"}
+                mt={10}
+                width={"50vw"}
+                borderRadius={10}
+              >
+                <Flex flexDir={"row"} justifyContent={"space-around"}>
+                  <Text ml={-40}>
+                    {"From:"} {chat.user_id.slice(0, 6)}
+                    {"..."}
+                    {chat.user_id.slice(-8)}
+                  </Text>
+
+                  <Text>
+                    <b>{chat.message_body}</b>
+                  </Text>
+                </Flex>
+              </Box>
+            ))}
+          </Flex>
+          <Flex
+            position="absolute"
+            flexDir={"row"}
+            width={"100vw"}
+            bottom="0"
+            padding={10}
+          >
+            <Input
+              type="text"
+              onChange={(e) => setInputMessage(e.target.value)}
+              value={inputMessage}
+            />
+            <Button onClick={sendChat}>Send Message</Button>
+          </Flex>
+        </div>
       )}
     </div>
   );
