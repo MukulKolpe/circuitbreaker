@@ -5,23 +5,24 @@ import { Identity } from "@semaphore-protocol/identity";
 import { generateProof } from "@semaphore-protocol/proof";
 import { Group } from "@semaphore-protocol/group";
 import { ethers } from "ethers";
+import { Center } from "@chakra-ui/react";
 
 const index = () => {
   const router = useRouter();
+  const groupChatId = router.query.chatId;
   const [_identity, setIdentity] = useState<Identity>();
-  const [groupChatId, setGroupChatId] = useState(
-    "85119186912718462354884141238312"
-  );
   const [grpMemberId, setGrpMemberId] = useState(
     "16081179360181561876336335380482356100492060555330666443062979952430873826045"
   );
   const [sampleMsg, setSampleMsg] = useState("Hello World!");
   const [grpMembers, setGrpMembers] = useState([]);
   const [inputMessage, setInputMessage] = useState("");
+  const [isMember, setIsMember] = useState("loading");
   const localStorageCommitment = "bandada-identity-commitment";
   const localStoragePrivateKey = "bandada-identity-privatekey";
   const localStorageSecret = "bandada-identity-Secret";
   const localStorageString = "bandada-identity-String";
+  const localCustomCommitment = "semaphore-id";
 
   const getInfo = async () => {
     const chatId = router.query.chatId;
@@ -37,8 +38,11 @@ const index = () => {
 
   const generateMerkleProof = async () => {
     //const chatId = router.query.chatId;
+    const tempIdentityString = localStorage.getItem(localCustomCommitment);
+    const tempidentity = new Identity(tempIdentityString);
+
     const res = await fetch(
-      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${grpMemberId}/proof`
+      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${tempidentity._commitment}/proof`
     );
     if (res.status == 200) {
       const data = await res.json();
@@ -82,11 +86,19 @@ const index = () => {
   };
 
   const checkMember = async () => {
+    const tempIdentityString = localStorage.getItem(localCustomCommitment);
+    const tempidentity = new Identity(tempIdentityString);
+
     const res = await fetch(
-      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${grpMemberId}`
+      `https://api.bandada.pse.dev/groups/${groupChatId}/members/${tempidentity._commitment}`
     );
     const data = await res.json();
     console.log(data);
+    if (data) {
+      setIsMember("Granted");
+    } else {
+      setIsMember("Denied");
+    }
   };
 
   useEffect(() => {
@@ -105,6 +117,14 @@ const index = () => {
     }
   }, [localStorageCommitment]);
 
+  const getCustomCommitment = async () => {
+    const tempIdentityString = localStorage.getItem(localCustomCommitment);
+    const identity = new Identity(tempIdentityString);
+    setIdentity(identity);
+    console.log(identity);
+    console.log(identity._commitment.toString());
+  };
+
   const getChats = async () => {
     const res = await fetch(`/api/get-messages`, {
       method: "POST",
@@ -120,6 +140,8 @@ const index = () => {
   };
 
   const sendChat = async () => {
+    const tempIdentityString = localStorage.getItem(localCustomCommitment);
+    const tempidentity = new Identity(tempIdentityString);
     const res = await fetch(`/api/send-messages`, {
       method: "POST",
       headers: {
@@ -128,7 +150,7 @@ const index = () => {
       body: JSON.stringify({
         groupId: router.query.chatId,
         messageBody: inputMessage,
-        userId: localStorage.getItem(localStorageCommitment),
+        userId: tempidentity._commitment.toString(),
       }),
     });
     const data = await res.json();
@@ -144,16 +166,27 @@ const index = () => {
     }
   }, [router]);
 
+  if (isMember == "loading") {
+    return <Center>Loading...</Center>;
+  }
+
   return (
     <div>
-      {router.query.chatId}
-      <button onClick={generateMessageProof}>Click Me</button>
-      <input
-        type="text"
-        onChange={(e) => setInputMessage(e.target.value)}
-        value={inputMessage}
-      />
-      <button onClick={sendChat}>Send Message</button>
+      {isMember == "Denied" ? (
+        <Center>You are not a member of the Group</Center>
+      ) : (
+        <>
+          {router.query.chatId}
+          <button onClick={generateMessageProof}>Click Me</button>
+          <input
+            type="text"
+            onChange={(e) => setInputMessage(e.target.value)}
+            value={inputMessage}
+          />
+          <button onClick={sendChat}>Send Message</button>
+          <button onClick={getCustomCommitment}>Set Commitment</button>
+        </>
+      )}
     </div>
   );
 };
